@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  APP_PORT: 3000
+
+jobs:
+  deploy-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.IMAGE_NAME }} .
+
+      - name: Start application
+        run: |
+          docker run -d -p ${{ env.APP_PORT }}:${{ env.APP_PORT }} --name calculator-app ${{ env.IMAGE_NAME }}
+          # Wait for the application to start
+          sleep 10
+
+      - name: Check application health
+        run: |
+          HEALTH_CHECK=$(curl -s http://localhost:${{ env.APP_PORT }}/health)
+          if [[ $HEALTH_CHECK == *"healthy"* ]]; then
+            echo "APP_URL=http://localhost:${{ env.APP_PORT }}" >> $GITHUB_ENV
+            echo "DEPLOYMENT_SUCCESS=true" >> $GITHUB_ENV
+          else
+            echo "Application health check failed"
+            exit 1
+          fi
+
+      - name: Output deployment information
+        run: |
+          echo "Application deployed successfully!"
+          echo "Base URL: ${{ env.APP_URL }}"
+          echo "You can now test the following endpoints:"
+          echo "- Health Check: ${{ env.APP_URL }}/health"
+          echo "- Sum API: ${{ env.APP_URL }}/api/calculator/sum"
+          echo "- Multiply API: ${{ env.APP_URL }}/api/calculator/multiply"
+          echo "Example curl commands:"
+          echo "curl -X POST ${{ env.APP_URL }}/api/calculator/sum -H 'Content-Type: application/json' -d '{\"num1\": 5, \"num2\": 3}'"
+          echo "curl -X POST ${{ env.APP_URL }}/api/calculator/multiply -H 'Content-Type: application/json' -d '{\"num1\": 5, \"num2\": 3}'"
+
+      - name: Cleanup
+        if: always()
+        run: docker stop calculator-app || true && docker rm calculator-app || true
