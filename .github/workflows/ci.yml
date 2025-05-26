@@ -50,8 +50,8 @@ jobs:
       - name: Run API tests
         run: |
           echo "Running API tests..."
+          docker pull ${{ env.TEST_IMAGE }}
           docker run --rm \
-            --platform linux/amd64 \
             --network host \
             -e CALCULATOR_API_URL=http://localhost:${{ env.APP_PORT }} \
             ${{ env.TEST_IMAGE }}
