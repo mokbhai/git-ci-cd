@@ -10,6 +10,7 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   APP_PORT: 3000
+  TEST_IMAGE: mokshitjain18/api-testcases:v1
 
 jobs:
   deploy-and-test:
@@ -45,6 +46,20 @@ jobs:
             echo "Application health check failed"
             exit 1
           fi
+
+      - name: Run API tests
+        run: |
+          echo "Running API tests..."
+          docker run --rm \
+            --network host \
+            -e CALCULATOR_API_URL=http://localhost:${{ env.APP_PORT }} \
+            ${{ env.TEST_IMAGE }}
+          TEST_EXIT_CODE=$?
+          if [ $TEST_EXIT_CODE -ne 0 ]; then
+            echo "API tests failed"
+            exit 1
+          fi
+          echo "API tests passed successfully"
 
       - name: Output deployment information
         run: |
