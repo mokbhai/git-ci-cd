@@ -51,6 +51,7 @@ jobs:
         run: |
           echo "Running API tests..."
           docker run --rm \
+            --platform linux/amd64 \
             --network host \
             -e CALCULATOR_API_URL=http://localhost:${{ env.APP_PORT }} \
             ${{ env.TEST_IMAGE }}
