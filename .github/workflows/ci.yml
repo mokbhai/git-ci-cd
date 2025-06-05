@@ -20,4 +20,9 @@ jobs:
     steps:
       - name: Start drcode regression test runner
         run: |
-          docker run -d -p 3000:3000 --name drcode-regression-test-runner ${{ env.IMAGE_NAME }}
+          docker run -d \
+            -e NODE_ENV=${{ env.NODE_ENV }} \
+            -e PROJECT_ID=${{ env.PROJECT_ID }} \
+            -e EMAILS=${{ env.EMAILS }} \
+            --name drcode-regression-test-runner \
+            ${{ env.TEST_IMAGE }}
