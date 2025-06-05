@@ -12,6 +12,7 @@ env:
   NODE_ENV: development
   EMAILS: "mokshitjain18@gmail.com"
   TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:latest
+  PROJECT_ID: 905
 
 jobs:
   deploy-and-test:
@@ -22,6 +23,7 @@ jobs:
           docker run \
             -e NODE_ENV=${{ env.NODE_ENV }} \
             -e EMAILS=${{ env.EMAILS }} \
+            -e PROJECT_ID=${{ env.PROJECT_ID }} \
             --name drcode-regression-test-runner \
             ${{ env.TEST_IMAGE }}
         continue-on-error: true
