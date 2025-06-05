@@ -18,11 +18,22 @@ jobs:
   deploy-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Start drcode regression test runner
+      - name: Run regression tests
         run: |
-          docker run -d \
+          docker run \
             -e NODE_ENV=${{ env.NODE_ENV }} \
             -e PROJECT_ID=${{ env.PROJECT_ID }} \
             -e EMAILS=${{ env.EMAILS }} \
             --name drcode-regression-test-runner \
             ${{ env.TEST_IMAGE }}
+        continue-on-error: true
+
+      - name: Check container logs
+        if: always()
+        run: |
+          docker logs drcode-regression-test-runner
+
+      - name: Cleanup container
+        if: always()
+        run: |
+          docker rm -f drcode-regression-test-runner || true
