@@ -10,7 +10,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   NODE_ENV: development
-  PROJECT_ID: 905
   EMAILS: "mokshitjain18@gmail.com"
   TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:latest
 
@@ -22,7 +21,6 @@ jobs:
         run: |
           docker run \
             -e NODE_ENV=${{ env.NODE_ENV }} \
-            -e PROJECT_ID=${{ env.PROJECT_ID }} \
             -e EMAILS=${{ env.EMAILS }} \
             --name drcode-regression-test-runner \
             ${{ env.TEST_IMAGE }}
