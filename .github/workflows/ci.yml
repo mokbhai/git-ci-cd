@@ -1,39 +1,60 @@
 name: CI/CD Pipeline
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+on: [push, pull_request]
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   NODE_ENV: development
   EMAILS: "mokshitjain18@gmail.com"
-  TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:latest
+  TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:v3
   PROJECT_ID: 905
+  PORT: 3000
+  LOCAL_HOST: main-app
+  PREFIX: ""
 
 jobs:
-  deploy-and-test:
+  build-and-run-test-app:
     runs-on: ubuntu-latest
     steps:
-      - name: Run regression tests
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Docker network
+        run: docker network create ci-network
+
+      - name: Build test app container
+        run: docker build -t ${{ env.LOCAL_HOST }} .
+
+      - name: Run test app container
+        run: |
+          docker run -d \
+            --network ci-network \
+            --name ${{ env.LOCAL_HOST }} \
+            -p 3000:3000 \
+            ${{ env.LOCAL_HOST }}
+
+      - name: Run regression tests and start LocalTunnel
         run: |
           docker run \
+            --network ci-network \
             -e NODE_ENV=${{ env.NODE_ENV }} \
             -e EMAILS=${{ env.EMAILS }} \
             -e PROJECT_ID=${{ env.PROJECT_ID }} \
+            -e PORT=${{ env.PORT }} \
+            -e LOCAL_HOST=${{ env.LOCAL_HOST }} \
+            -e PREFIX=${{ env.PREFIX }} \
             --name drcode-regression-test-runner \
             ${{ env.TEST_IMAGE }}
         continue-on-error: true
 
       - name: Check container logs
         if: always()
-        run: |
-          docker logs drcode-regression-test-runner
+        run: docker logs drcode-regression-test-runner
 
-      - name: Cleanup container
+      - name: Cleanup containers
         if: always()
         run: |
           docker rm -f drcode-regression-test-runner || true
+          docker rm -f ${{ env.LOCAL_HOST }} || true
+          docker network rm ci-network || true
