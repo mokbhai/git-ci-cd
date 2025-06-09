@@ -10,7 +10,7 @@ env:
   TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:v3
   PROJECT_ID: 905
   PORT: 3000
-  LOCAL_HOST: main-app
+  LOCAL_HOST: host.docker.internal
   PREFIX: ""
 
 jobs:
@@ -20,19 +20,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Create Docker network
-        run: docker network create ci-network
-
-      - name: Build test app container
-        run: docker build -t ${{ env.LOCAL_HOST }} .
+      - name: Npm install
+        run: npm install
 
       - name: Run test app container
         run: |
-          docker run -d \
-            --network ci-network \
-            --name ${{ env.LOCAL_HOST }} \
-            -p 3000:3000 \
-            ${{ env.LOCAL_HOST }}
+          npm run start
 
       - name: Run regression tests and start LocalTunnel
         run: |
