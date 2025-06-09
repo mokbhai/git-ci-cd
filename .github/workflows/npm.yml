@@ -30,8 +30,9 @@ jobs:
 
       - name: Start application
         run: |
-          npm run start &
+          nohup npm run start > app.log 2>&1 &
           sleep 10  # Give the server time to start up
+          cat app.log  # Display the logs to verify server started
 
       - name: Run regression tests and start LocalTunnel
         run: |
@@ -54,3 +55,7 @@ jobs:
         if: always()
         run: |
           docker rm -f drcode-regression-test-runner || true
+
+      - name: Check application logs
+        if: always()
+        run: cat app.log
