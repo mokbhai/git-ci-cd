@@ -1,4 +1,4 @@
-name: CI/CD Pipeline 1
+name: CI/CD Pipeline 2
 
 on: [push, pull_request]
 
@@ -16,6 +16,7 @@ env:
 jobs:
   build-and-run-test-app:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
