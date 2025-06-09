@@ -1,0 +1,29 @@
+services:
+  main-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: main-app
+    ports:
+      - "3000:3000"
+    networks:
+      - test-network
+
+  test-runner:
+    image: mokshitjain18/drcode-regression-test-runner:v3
+    container_name: drcode-regression-test-runner
+    environment:
+      - NODE_ENV=development
+      - EMAILS=mokshitjain18@gmail.com
+      - PROJECT_ID=905
+      - PORT=3000
+      - LOCAL_HOST=main-app
+      - PREFIX=
+    depends_on:
+      - main-app
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    name: test-network

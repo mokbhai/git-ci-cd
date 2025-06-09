@@ -1,0 +1,32 @@
+name: CI/CD Pipeline with Docker Compose
+
+on: [push, pull_request]
+
+env:
+  NODE_ENV: development
+  EMAILS: "mokshitjain18@gmail.com"
+  PROJECT_ID: 905
+  PORT: 3000
+  LOCAL_HOST: main-app
+  PREFIX: ""
+
+jobs:
+  build-and-run-test-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run tests with Docker Compose
+        run: |
+          docker-compose -f docker-compose.test.yaml up --build --abort-on-container-exit --exit-code-from test-runner
+
+      - name: Check test runner logs
+        if: always()
+        run: docker logs drcode-regression-test-runner
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker-compose -f docker-compose.test.yaml down --remove-orphans
+          docker network prune -f
