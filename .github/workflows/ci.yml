@@ -46,7 +46,6 @@ jobs:
             -e PREFIX=${{ env.PREFIX }} \
             --name drcode-regression-test-runner \
             ${{ env.TEST_IMAGE }}
-        continue-on-error: true
 
       - name: Check container logs
         if: always()
