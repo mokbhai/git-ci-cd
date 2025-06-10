@@ -7,7 +7,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   NODE_ENV: development
   EMAILS: "mokshitjain18@gmail.com"
-  TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:v3
+  TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:latest
   PROJECT_ID: 905
   PORT: 3000
   LOCAL_HOST: host.docker.internal
