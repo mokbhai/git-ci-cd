@@ -10,7 +10,7 @@ env:
   TEST_IMAGE: mokshitjain18/drcode-regression-test-runner:latest
   PROJECT_ID: 905
   PORT: 3000
-  LOCAL_HOST: host.docker.internal
+  LOCAL_HOST: localhost
   PREFIX: ""
 
 jobs:
@@ -37,6 +37,7 @@ jobs:
       - name: Run regression tests and start LocalTunnel
         run: |
           docker run \
+            --network="host" \
             -e NODE_ENV=${{ env.NODE_ENV }} \
             -e EMAILS=${{ env.EMAILS }} \
             -e PROJECT_ID=${{ env.PROJECT_ID }} \
@@ -49,7 +50,13 @@ jobs:
 
       - name: Check container logs
         if: always()
-        run: docker logs drcode-regression-test-runner
+        run: |
+          echo "Container logs:"
+          docker logs drcode-regression-test-runner
+          echo "\nNetwork configuration:"
+          docker network inspect bridge
+          echo "\nContainer network info:"
+          docker inspect drcode-regression-test-runner | grep -A 20 "NetworkSettings"
 
       - name: Cleanup containers
         if: always()
